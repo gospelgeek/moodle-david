@@ -94,14 +94,14 @@ function get_info_course_sections_by_user($courseid, $userid) {
                         INNER JOIN {course_modules} AS modules ON modules.section = sections.id
                         LEFT JOIN {course_modules_completion} AS modules_completion ON modules_completion.coursemoduleid = modules.id
                     WHERE
-                        sections.course = $courseid
-                        AND modules_completion.userid = $userid
+                        sections.course = :courseid
+                        AND modules_completion.userid = :userid
                     GROUP BY
                         sections.id,
                         sections.section,
                         sections.name";
     
-    $info_sections_array = $DB->get_records_sql($sql_query);
+    $info_sections_array = $DB->get_records_sql($sql_query, array('courseid'=>$courseid, 'userid'=>$userid));
     
     foreach ($info_sections_array as &$info_section) {
         $info_section->percent = $info_section->sum_completionstate / ( $info_section->count_coursemoduleid * 100 );
