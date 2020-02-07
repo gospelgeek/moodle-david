@@ -81,13 +81,14 @@ function get_best_students_nosql($courseid, $nstudents) {
 function get_info_course_sections_by_user($courseid, $userid) {
 
     global $DB;
-
+    
     $sql_query =   "SELECT
                         sections.id,
                         sections.section AS section_position,
                         sections.name AS section_name,
                         COUNT(DISTINCT modules_completion.coursemoduleid) AS modules,
-                        SUM(modules_completion.completionstate)/COUNT(DISTINCT modules_completion.coursemoduleid)*100 AS percent
+                        SUM(modules_completion.completionstate) AS sum_completionstate,
+                        COUNT(DISTINCT modules_completion.coursemoduleid) AS count_coursemoduleid
                     FROM
                         {course_sections} AS sections
                         INNER JOIN {course_modules} AS modules ON modules.section = sections.id
@@ -97,10 +98,14 @@ function get_info_course_sections_by_user($courseid, $userid) {
                         AND modules_completion.userid = $userid
                     GROUP BY
                         sections.id,
-                        position,
-                        section_name";
-
+                        sections.section,
+                        sections.name";
+    
     $info_sections_array = $DB->get_records_sql($sql_query);
+    
+    foreach ($info_sections_array as &$info_section) {
+        $info_section->percent = $info_section->sum_completionstate / ( $info_section->count_coursemoduleid * 100 );
+    }
 
     return $info_sections_array;
 }
