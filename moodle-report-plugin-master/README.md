@@ -1,1 +1,0 @@
-# moodle-report-plugin
